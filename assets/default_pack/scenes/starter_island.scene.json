@@ -1,0 +1,560 @@
+{
+  "name": "Starter Island",
+  "units": "meters",
+  "camera": {
+    "position": [
+      10,
+      8,
+      14
+    ],
+    "look_at": [
+      0,
+      1,
+      0
+    ],
+    "fov_degrees": 60
+  },
+  "environment": {
+    "equirectangular": "textures/environment/debug_equirectangular.png",
+    "exposure": 1.0
+  },
+  "terrain": {
+    "model": "models/terrain/terrain_32m.glb",
+    "heightmap": "maps/starter_island_height.png",
+    "splatmap": "maps/starter_island_splat.png",
+    "materials": [
+      "grass",
+      "dirt",
+      "rock",
+      "sand"
+    ]
+  },
+  "lights": [
+    {
+      "type": "directional",
+      "direction": [
+        -0.4,
+        -1,
+        -0.3
+      ],
+      "color": [
+        1,
+        0.94,
+        0.82
+      ],
+      "intensity": 4,
+      "shadows": true
+    },
+    {
+      "type": "point",
+      "position": [
+        -4,
+        2.5,
+        2
+      ],
+      "color": [
+        1,
+        0.45,
+        0.18
+      ],
+      "intensity": 20,
+      "range": 8
+    }
+  ],
+  "entities": [
+    {
+      "name": "Cabin",
+      "model": "models/architecture/cabin.glb",
+      "position": [
+        -5,
+        0,
+        -2
+      ],
+      "rotation": [
+        0,
+        35,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "Bridge",
+      "model": "models/architecture/bridge.glb",
+      "position": [
+        4,
+        0.1,
+        1
+      ],
+      "rotation": [
+        0,
+        80,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "Player",
+      "model": "models/characters/humanoid_static.glb",
+      "position": [
+        0,
+        0,
+        2
+      ],
+      "rotation": [
+        0,
+        180,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "CrateA",
+      "model": "models/props/crate.glb",
+      "position": [
+        -3.2,
+        0,
+        -0.7
+      ],
+      "rotation": [
+        0,
+        12,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "CrateB",
+      "model": "models/props/crate.glb",
+      "position": [
+        -2,
+        0,
+        -1
+      ],
+      "rotation": [
+        0,
+        -18,
+        0
+      ],
+      "scale": [
+        0.75,
+        0.75,
+        0.75
+      ]
+    },
+    {
+      "name": "Barrel",
+      "model": "models/props/barrel.glb",
+      "position": [
+        -4,
+        0,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "Lamp",
+      "model": "models/props/lamp_post.glb",
+      "position": [
+        -1,
+        0,
+        -2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "RockCluster",
+      "model": "models/nature/rock_cluster.glb",
+      "position": [
+        5,
+        0,
+        -4
+      ],
+      "rotation": [
+        0,
+        20,
+        0
+      ],
+      "scale": [
+        1.4,
+        1.4,
+        1.4
+      ]
+    },
+    {
+      "name": "Tree00",
+      "model": "models/nature/tree_oak.glb",
+      "position": [
+        0.0,
+        0,
+        11.0
+      ],
+      "rotation": [
+        0,
+        0.0,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    },
+    {
+      "name": "Tree01",
+      "model": "models/nature/tree_pine.glb",
+      "position": [
+        10.908312914977154,
+        0,
+        6.5761738051602805
+      ],
+      "rotation": [
+        0,
+        47.0,
+        0
+      ],
+      "scale": [
+        0.92,
+        0.92,
+        0.92
+      ]
+    },
+    {
+      "name": "Tree02",
+      "model": "models/nature/tree_oak.glb",
+      "position": [
+        -2.8109521222951432,
+        0,
+        -3.1370796516952293
+      ],
+      "rotation": [
+        0,
+        94.0,
+        0
+      ],
+      "scale": [
+        1.04,
+        1.04,
+        1.04
+      ]
+    },
+    {
+      "name": "Tree03",
+      "model": "models/nature/tree_pine.glb",
+      "position": [
+        -10.183961505605057,
+        0,
+        -10.327079447011098
+      ],
+      "rotation": [
+        0,
+        141.0,
+        0
+      ],
+      "scale": [
+        1.1600000000000001,
+        1.1600000000000001,
+        1.1600000000000001
+      ]
+    },
+    {
+      "name": "Tree04",
+      "model": "models/nature/tree_oak.glb",
+      "position": [
+        5.43524686252469,
+        0,
+        -9.21067841071268
+      ],
+      "rotation": [
+        0,
+        188.0,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    },
+    {
+      "name": "Tree05",
+      "model": "models/nature/tree_pine.glb",
+      "position": [
+        8.783358238858392,
+        0,
+        -0.6858336606769082
+      ],
+      "rotation": [
+        0,
+        235.0,
+        0
+      ],
+      "scale": [
+        0.92,
+        0.92,
+        0.92
+      ]
+    },
+    {
+      "name": "Tree06",
+      "model": "models/nature/tree_oak.glb",
+      "position": [
+        -7.698621563528966,
+        0,
+        8.390649073614373
+      ],
+      "rotation": [
+        0,
+        282.0,
+        0
+      ],
+      "scale": [
+        1.04,
+        1.04,
+        1.04
+      ]
+    },
+    {
+      "name": "Tree07",
+      "model": "models/nature/tree_pine.glb",
+      "position": [
+        -6.799508234607366,
+        0,
+        10.718263959985132
+      ],
+      "rotation": [
+        0,
+        329.0,
+        0
+      ],
+      "scale": [
+        1.1600000000000001,
+        1.1600000000000001,
+        1.1600000000000001
+      ]
+    },
+    {
+      "name": "Tree08",
+      "model": "models/nature/tree_oak.glb",
+      "position": [
+        9.450779963421454,
+        0,
+        4.424835779194301
+      ],
+      "rotation": [
+        0,
+        16.0,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    },
+    {
+      "name": "Tree09",
+      "model": "models/nature/tree_pine.glb",
+      "position": [
+        4.36414630443675,
+        0,
+        -5.42762957029904
+      ],
+      "rotation": [
+        0,
+        63.0,
+        0
+      ],
+      "scale": [
+        0.92,
+        0.92,
+        0.92
+      ]
+    },
+    {
+      "name": "Tree10",
+      "model": "models/nature/tree_oak.glb",
+      "position": [
+        -10.575372410675126,
+        0,
+        -10.914478579978638
+      ],
+      "rotation": [
+        0,
+        110.0,
+        0
+      ],
+      "scale": [
+        1.04,
+        1.04,
+        1.04
+      ]
+    },
+    {
+      "name": "Tree11",
+      "model": "models/nature/tree_pine.glb",
+      "position": [
+        -1.6389892839561868,
+        0,
+        -7.622462817817056
+      ],
+      "rotation": [
+        0,
+        157.0,
+        0
+      ],
+      "scale": [
+        1.1600000000000001,
+        1.1600000000000001,
+        1.1600000000000001
+      ]
+    },
+    {
+      "name": "Tree12",
+      "model": "models/nature/tree_oak.glb",
+      "position": [
+        10.997721901569362,
+        0,
+        1.8005439775537717
+      ],
+      "rotation": [
+        0,
+        204.0,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    },
+    {
+      "name": "Tree13",
+      "model": "models/nature/tree_pine.glb",
+      "position": [
+        -1.1950025496648384,
+        0,
+        9.775315570585823
+      ],
+      "rotation": [
+        0,
+        251.0,
+        0
+      ],
+      "scale": [
+        0.92,
+        0.92,
+        0.92
+      ]
+    },
+    {
+      "name": "Tree14",
+      "model": "models/nature/tree_oak.glb",
+      "position": [
+        -10.689782903182497,
+        0,
+        9.887487693802935
+      ],
+      "rotation": [
+        0,
+        298.0,
+        0
+      ],
+      "scale": [
+        1.04,
+        1.04,
+        1.04
+      ]
+    },
+    {
+      "name": "Tree15",
+      "model": "models/nature/tree_pine.glb",
+      "position": [
+        3.949641894243851,
+        0,
+        2.0468367150198996
+      ],
+      "rotation": [
+        0,
+        345.0,
+        0
+      ],
+      "scale": [
+        1.1600000000000001,
+        1.1600000000000001,
+        1.1600000000000001
+      ]
+    },
+    {
+      "name": "Tree16",
+      "model": "models/nature/tree_oak.glb",
+      "position": [
+        9.672003678157967,
+        0,
+        -7.440150604938539
+      ],
+      "rotation": [
+        0,
+        32.0,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    },
+    {
+      "name": "Tree17",
+      "model": "models/nature/tree_pine.glb",
+      "position": [
+        -6.442010739717273,
+        0,
+        -10.942786444955217
+      ],
+      "rotation": [
+        0,
+        79.0,
+        0
+      ],
+      "scale": [
+        0.92,
+        0.92,
+        0.92
+      ]
+    }
+  ]
+}

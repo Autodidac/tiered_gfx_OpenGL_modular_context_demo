@@ -1,0 +1,146 @@
+{
+  "name": "Modular Room",
+  "units": "meters",
+  "camera": {
+    "position": [
+      0,
+      2,
+      7
+    ],
+    "look_at": [
+      0,
+      1.5,
+      0
+    ],
+    "fov_degrees": 60
+  },
+  "entities": [
+    {
+      "name": "Floor",
+      "model": "models/primitives/box.glb",
+      "position": [
+        0,
+        -0.1,
+        0
+      ],
+      "scale": [
+        8,
+        0.2,
+        8
+      ],
+      "material": "concrete"
+    },
+    {
+      "name": "BackWall",
+      "model": "models/primitives/box.glb",
+      "position": [
+        0,
+        2,
+        -4
+      ],
+      "scale": [
+        8,
+        4,
+        0.2
+      ],
+      "material": "brick"
+    },
+    {
+      "name": "LeftWall",
+      "model": "models/primitives/box.glb",
+      "position": [
+        -4,
+        2,
+        0
+      ],
+      "scale": [
+        0.2,
+        4,
+        8
+      ],
+      "material": "concrete"
+    },
+    {
+      "name": "RightWall",
+      "model": "models/primitives/box.glb",
+      "position": [
+        4,
+        2,
+        0
+      ],
+      "scale": [
+        0.2,
+        4,
+        8
+      ],
+      "material": "painted_metal"
+    },
+    {
+      "name": "Crate",
+      "model": "models/props/crate.glb",
+      "position": [
+        -2,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        25,
+        0
+      ]
+    },
+    {
+      "name": "Barrel",
+      "model": "models/props/barrel.glb",
+      "position": [
+        1.5,
+        0,
+        -1
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "lights": [
+    {
+      "type": "spot",
+      "position": [
+        0,
+        3.8,
+        1
+      ],
+      "direction": [
+        0,
+        -1,
+        -0.2
+      ],
+      "color": [
+        1,
+        0.8,
+        0.6
+      ],
+      "intensity": 25,
+      "range": 10,
+      "inner_angle": 20,
+      "outer_angle": 35
+    },
+    {
+      "type": "point",
+      "position": [
+        -2,
+        1.5,
+        -2
+      ],
+      "color": [
+        0.2,
+        0.45,
+        1
+      ],
+      "intensity": 12,
+      "range": 6
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "grass": {
+    "base_color": "textures/materials/grass/base_color.png",
+    "normal": "textures/materials/grass/normal.png",
+    "height": "textures/materials/grass/height.png",
+    "roughness": "textures/materials/grass/roughness.png",
+    "metallic": "textures/materials/grass/metallic.png",
+    "ambient_occlusion": "textures/materials/grass/ambient_occlusion.png",
+    "orm": "textures/materials/grass/orm.png"
+  },
+  "dirt": {
+    "base_color": "textures/materials/dirt/base_color.png",
+    "normal": "textures/materials/dirt/normal.png",
+    "height": "textures/materials/dirt/height.png",
+    "roughness": "textures/materials/dirt/roughness.png",
+    "metallic": "textures/materials/dirt/metallic.png",
+    "ambient_occlusion": "textures/materials/dirt/ambient_occlusion.png",
+    "orm": "textures/materials/dirt/orm.png"
+  },
+  "sand": {
+    "base_color": "textures/materials/sand/base_color.png",
+    "normal": "textures/materials/sand/normal.png",
+    "height": "textures/materials/sand/height.png",
+    "roughness": "textures/materials/sand/roughness.png",
+    "metallic": "textures/materials/sand/metallic.png",
+    "ambient_occlusion": "textures/materials/sand/ambient_occlusion.png",
+    "orm": "textures/materials/sand/orm.png"
+  },
+  "rock": {
+    "base_color": "textures/materials/rock/base_color.png",
+    "normal": "textures/materials/rock/normal.png",
+    "height": "textures/materials/rock/height.png",
+    "roughness": "textures/materials/rock/roughness.png",
+    "metallic": "textures/materials/rock/metallic.png",
+    "ambient_occlusion": "textures/materials/rock/ambient_occlusion.png",
+    "orm": "textures/materials/rock/orm.png"
+  },
+  "concrete": {
+    "base_color": "textures/materials/concrete/base_color.png",
+    "normal": "textures/materials/concrete/normal.png",
+    "height": "textures/materials/concrete/height.png",
+    "roughness": "textures/materials/concrete/roughness.png",
+    "metallic": "textures/materials/concrete/metallic.png",
+    "ambient_occlusion": "textures/materials/concrete/ambient_occlusion.png",
+    "orm": "textures/materials/concrete/orm.png"
+  },
+  "brick": {
+    "base_color": "textures/materials/brick/base_color.png",
+    "normal": "textures/materials/brick/normal.png",
+    "height": "textures/materials/brick/height.png",
+    "roughness": "textures/materials/brick/roughness.png",
+    "metallic": "textures/materials/brick/metallic.png",
+    "ambient_occlusion": "textures/materials/brick/ambient_occlusion.png",
+    "orm": "textures/materials/brick/orm.png"
+  },
+  "wood": {
+    "base_color": "textures/materials/wood/base_color.png",
+    "normal": "textures/materials/wood/normal.png",
+    "height": "textures/materials/wood/height.png",
+    "roughness": "textures/materials/wood/roughness.png",
+    "metallic": "textures/materials/wood/metallic.png",
+    "ambient_occlusion": "textures/materials/wood/ambient_occlusion.png",
+    "orm": "textures/materials/wood/orm.png"
+  },
+  "painted_metal": {
+    "base_color": "textures/materials/painted_metal/base_color.png",
+    "normal": "textures/materials/painted_metal/normal.png",
+    "height": "textures/materials/painted_metal/height.png",
+    "roughness": "textures/materials/painted_metal/roughness.png",
+    "metallic": "textures/materials/painted_metal/metallic.png",
+    "ambient_occlusion": "textures/materials/painted_metal/ambient_occlusion.png",
+    "orm": "textures/materials/painted_metal/orm.png"
+  },
+  "rusted_metal": {
+    "base_color": "textures/materials/rusted_metal/base_color.png",
+    "normal": "textures/materials/rusted_metal/normal.png",
+    "height": "textures/materials/rusted_metal/height.png",
+    "roughness": "textures/materials/rusted_metal/roughness.png",
+    "metallic": "textures/materials/rusted_metal/metallic.png",
+    "ambient_occlusion": "textures/materials/rusted_metal/ambient_occlusion.png",
+    "orm": "textures/materials/rusted_metal/orm.png"
+  },
+  "ceramic_tile": {
+    "base_color": "textures/materials/ceramic_tile/base_color.png",
+    "normal": "textures/materials/ceramic_tile/normal.png",
+    "height": "textures/materials/ceramic_tile/height.png",
+    "roughness": "textures/materials/ceramic_tile/roughness.png",
+    "metallic": "textures/materials/ceramic_tile/metallic.png",
+    "ambient_occlusion": "textures/materials/ceramic_tile/ambient_occlusion.png",
+    "orm": "textures/materials/ceramic_tile/orm.png"
+  },
+  "water": {
+    "base_color": "textures/materials/water/base_color.png",
+    "normal": "textures/materials/water/normal.png",
+    "height": "textures/materials/water/height.png",
+    "roughness": "textures/materials/water/roughness.png",
+    "metallic": "textures/materials/water/metallic.png",
+    "ambient_occlusion": "textures/materials/water/ambient_occlusion.png",
+    "orm": "textures/materials/water/orm.png"
+  },
+  "foliage": {
+    "base_color": "textures/materials/foliage/base_color.png",
+    "normal": "textures/materials/foliage/normal.png",
+    "height": "textures/materials/foliage/height.png",
+    "roughness": "textures/materials/foliage/roughness.png",
+    "metallic": "textures/materials/foliage/metallic.png",
+    "ambient_occlusion": "textures/materials/foliage/ambient_occlusion.png",
+    "orm": "textures/materials/foliage/orm.png"
+  }
+}

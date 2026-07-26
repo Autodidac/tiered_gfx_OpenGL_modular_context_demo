@@ -1,0 +1,440 @@
+{
+  "name": "Renderer Lab",
+  "units": "meters",
+  "camera": {
+    "position": [
+      8,
+      6,
+      12
+    ],
+    "look_at": [
+      0,
+      1,
+      0
+    ],
+    "fov_degrees": 55
+  },
+  "environment": {
+    "cubemap_prefix": "textures/environment/debug_cubemap_",
+    "exposure": 1.0
+  },
+  "lights": [
+    {
+      "type": "directional",
+      "direction": [
+        -0.45,
+        -1,
+        -0.25
+      ],
+      "color": [
+        1,
+        0.95,
+        0.85
+      ],
+      "intensity": 3.5,
+      "shadows": true
+    },
+    {
+      "type": "point",
+      "position": [
+        -3,
+        2,
+        2
+      ],
+      "color": [
+        1,
+        0.15,
+        0.1
+      ],
+      "intensity": 18,
+      "range": 8
+    },
+    {
+      "type": "point",
+      "position": [
+        3,
+        2,
+        2
+      ],
+      "color": [
+        0.1,
+        0.25,
+        1
+      ],
+      "intensity": 18,
+      "range": 8
+    }
+  ],
+  "entities": [
+    {
+      "name": "box",
+      "model": "models/primitives/box.glb",
+      "position": [
+        -4.4,
+        0.8,
+        -1.1
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sphere_uv",
+      "model": "models/primitives/sphere_uv.glb",
+      "position": [
+        -2.2,
+        0.8,
+        -1.1
+      ],
+      "rotation": [
+        0,
+        17,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sphere_ico",
+      "model": "models/primitives/sphere_ico.glb",
+      "position": [
+        0.0,
+        0.8,
+        -1.1
+      ],
+      "rotation": [
+        0,
+        34,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "cylinder",
+      "model": "models/primitives/cylinder.glb",
+      "position": [
+        2.2,
+        0.8,
+        -1.1
+      ],
+      "rotation": [
+        0,
+        51,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "cone",
+      "model": "models/primitives/cone.glb",
+      "position": [
+        4.4,
+        0.8,
+        -1.1
+      ],
+      "rotation": [
+        0,
+        68,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "capsule",
+      "model": "models/primitives/capsule.glb",
+      "position": [
+        -4.4,
+        0.8,
+        1.1
+      ],
+      "rotation": [
+        0,
+        85,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "torus",
+      "model": "models/primitives/torus.glb",
+      "position": [
+        -2.2,
+        0.8,
+        1.1
+      ],
+      "rotation": [
+        0,
+        102,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "plane",
+      "model": "models/primitives/plane.glb",
+      "position": [
+        0.0,
+        0.8,
+        1.1
+      ],
+      "rotation": [
+        0,
+        119,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "pyramid",
+      "model": "models/primitives/pyramid.glb",
+      "position": [
+        2.2,
+        0.8,
+        1.1
+      ],
+      "rotation": [
+        0,
+        136,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "wedge",
+      "model": "models/primitives/wedge.glb",
+      "position": [
+        4.4,
+        0.8,
+        1.1
+      ],
+      "rotation": [
+        0,
+        153,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "Material_grass",
+      "model": "models/primitives/sphere_uv.glb",
+      "material": "materials/grass",
+      "position": [
+        -3.75,
+        3.2,
+        -1.0
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "name": "Material_dirt",
+      "model": "models/primitives/sphere_uv.glb",
+      "material": "materials/dirt",
+      "position": [
+        -2.25,
+        3.2,
+        -1.0
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "name": "Material_sand",
+      "model": "models/primitives/sphere_uv.glb",
+      "material": "materials/sand",
+      "position": [
+        -0.75,
+        3.2,
+        -1.0
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "name": "Material_rock",
+      "model": "models/primitives/sphere_uv.glb",
+      "material": "materials/rock",
+      "position": [
+        0.75,
+        3.2,
+        -1.0
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "name": "Material_concrete",
+      "model": "models/primitives/sphere_uv.glb",
+      "material": "materials/concrete",
+      "position": [
+        2.25,
+        3.2,
+        -1.0
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "name": "Material_brick",
+      "model": "models/primitives/sphere_uv.glb",
+      "material": "materials/brick",
+      "position": [
+        3.75,
+        3.2,
+        -1.0
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "name": "Material_wood",
+      "model": "models/primitives/sphere_uv.glb",
+      "material": "materials/wood",
+      "position": [
+        -3.75,
+        3.2,
+        0.5
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "name": "Material_painted_metal",
+      "model": "models/primitives/sphere_uv.glb",
+      "material": "materials/painted_metal",
+      "position": [
+        -2.25,
+        3.2,
+        0.5
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "name": "Material_rusted_metal",
+      "model": "models/primitives/sphere_uv.glb",
+      "material": "materials/rusted_metal",
+      "position": [
+        -0.75,
+        3.2,
+        0.5
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "name": "Material_ceramic_tile",
+      "model": "models/primitives/sphere_uv.glb",
+      "material": "materials/ceramic_tile",
+      "position": [
+        0.75,
+        3.2,
+        0.5
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "name": "Material_water",
+      "model": "models/primitives/sphere_uv.glb",
+      "material": "materials/water",
+      "position": [
+        2.25,
+        3.2,
+        0.5
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "name": "Material_foliage",
+      "model": "models/primitives/sphere_uv.glb",
+      "material": "materials/foliage",
+      "position": [
+        3.75,
+        3.2,
+        0.5
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ]
+    }
+  ]
+}

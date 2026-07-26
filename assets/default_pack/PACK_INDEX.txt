@@ -1,0 +1,10 @@
+Epoch Default Asset Pack
+textures/defaults
+textures/diagnostics
+textures/formats
+textures/materials
+textures/atlases
+models
+scenes
+maps
+License: CC0-1.0

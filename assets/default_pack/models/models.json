@@ -1,0 +1,22 @@
+{
+  "box": "models/primitives/box.glb",
+  "sphere_uv": "models/primitives/sphere_uv.glb",
+  "sphere_ico": "models/primitives/sphere_ico.glb",
+  "cylinder": "models/primitives/cylinder.glb",
+  "cone": "models/primitives/cone.glb",
+  "capsule": "models/primitives/capsule.glb",
+  "torus": "models/primitives/torus.glb",
+  "plane": "models/primitives/plane.glb",
+  "pyramid": "models/primitives/pyramid.glb",
+  "wedge": "models/primitives/wedge.glb",
+  "tree_oak": "models/nature/tree_oak.glb",
+  "tree_pine": "models/nature/tree_pine.glb",
+  "rock_cluster": "models/nature/rock_cluster.glb",
+  "crate": "models/props/crate.glb",
+  "barrel": "models/props/barrel.glb",
+  "lamp_post": "models/props/lamp_post.glb",
+  "cabin": "models/architecture/cabin.glb",
+  "bridge": "models/architecture/bridge.glb",
+  "humanoid_static": "models/characters/humanoid_static.glb",
+  "terrain_32m": "models/terrain/terrain_32m.glb"
+}
