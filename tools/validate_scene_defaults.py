@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
-"""Validate compiled scene defaults and required runtime assets."""
+"""Validate compiled scene defaults and packaged runtime assets."""
 
 from __future__ import annotations
 
 import re
 import shlex
 import sys
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CFG = ROOT / "assets/editor/default_scene.cfg"
 SCENE_INC = ROOT / "src/epoch/render/world/hardcoded_scene_defaults.inc"
 MATERIAL_INC = ROOT / "src/epoch/render/world/hardcoded_material_defaults.inc"
+MODEL_BUNDLE = ROOT / "assets/default_pack/model_bundle.zip"
 
 REQUIRED_MODELS = (
     "assets/default_pack/models/primitives/sphere_uv.obj",
@@ -68,7 +70,19 @@ def validate_sequence(label: str, entries: list[tuple[int, str]]) -> None:
 
 
 def validate_required_models() -> None:
-    missing = [relative for relative in REQUIRED_MODELS if not (ROOT / relative).is_file()]
+    bundled: set[str] = set()
+    if MODEL_BUNDLE.is_file():
+        try:
+            with zipfile.ZipFile(MODEL_BUNDLE) as archive:
+                archive.testzip()
+                bundled = set(archive.namelist())
+        except (OSError, zipfile.BadZipFile) as error:
+            fail(f"runtime model bundle is invalid: {error}")
+
+    missing = [
+        relative for relative in REQUIRED_MODELS
+        if not (ROOT / relative).is_file() and relative not in bundled
+    ]
     if missing:
         fail("required runtime model assets are missing: " + ", ".join(missing))
 
