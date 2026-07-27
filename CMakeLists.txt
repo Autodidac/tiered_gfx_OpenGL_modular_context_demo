@@ -49,21 +49,6 @@ elseif(NOT UNIX OR APPLE)
 endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-# Git commonly ignores Wavefront .obj files as compiler outputs. Keep the
-# complete runtime model set in one tracked archive, extract it to the build
-# tree at configure time, and merge it into the executable asset directory.
-set(EPOCH_MODEL_BUNDLE "${CMAKE_CURRENT_SOURCE_DIR}/assets/default_pack/model_bundle.zip")
-set(EPOCH_GENERATED_ASSET_ROOT "${CMAKE_BINARY_DIR}/generated_assets")
-if(NOT EXISTS "${EPOCH_MODEL_BUNDLE}")
-    message(FATAL_ERROR "Required runtime model bundle is missing: ${EPOCH_MODEL_BUNDLE}")
-endif()
-file(REMOVE_RECURSE "${EPOCH_GENERATED_ASSET_ROOT}")
-file(MAKE_DIRECTORY "${EPOCH_GENERATED_ASSET_ROOT}")
-file(ARCHIVE_EXTRACT
-    INPUT "${EPOCH_MODEL_BUNDLE}"
-    DESTINATION "${EPOCH_GENERATED_ASSET_ROOT}")
-
 add_subdirectory(vendor/EpochGui)
 
 set(EPOCH_PLATFORM_SOURCES)
@@ -261,10 +246,7 @@ add_custom_command(TARGET epoch_integrated_opengl_scene POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_CURRENT_SOURCE_DIR}/assets"
             "$<TARGET_FILE_DIR:epoch_integrated_opengl_scene>/assets"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${EPOCH_GENERATED_ASSET_ROOT}/assets"
-            "$<TARGET_FILE_DIR:epoch_integrated_opengl_scene>/assets"
-    COMMENT "Copying scene assets and extracted runtime models")
+    COMMENT "Copying scene models, textures, shaders and GUI assets")
 
 if(WIN32)
     set_property(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" PROPERTY VS_STARTUP_PROJECT epoch_integrated_opengl_scene)
