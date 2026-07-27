@@ -19,12 +19,27 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install Linux dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y g++-14 ninja-build libx11-dev libpng-dev libgl1-mesa-dev xvfb
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq g++-14 ninja-build libx11-dev libpng-dev libgl1-mesa-dev xvfb
       - name: Validate factory scene
         run: python3 tools/validate_scene_defaults.py
       - name: Configure and build
-        run: ./build_linux.sh
+        shell: bash
+        run: |
+          set +e
+          ./build_linux.sh > linux-build.log 2>&1
+          status=$?
+          if [[ $status -ne 0 ]]; then
+            tail -n 160 linux-build.log
+          fi
+          exit $status
+      - name: Upload Linux build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build-log
+          path: linux-build.log
+          if-no-files-found: error
       - name: Startup smoke test
         run: timeout 10s xvfb-run -a ./build/linux-gcc/bin/Release/epoch_integrated_opengl_scene || test $? -eq 124
 
