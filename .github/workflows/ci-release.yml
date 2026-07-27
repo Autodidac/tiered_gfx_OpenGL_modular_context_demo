@@ -22,7 +22,20 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq g++-14 ninja-build libx11-dev libpng-dev libgl1-mesa-dev mesa-utils xvfb
       - name: Validate factory scene
-        run: python3 tools/validate_scene_defaults.py
+        shell: bash
+        run: |
+          set +e
+          python3 tools/validate_scene_defaults.py > linux-validation.log 2>&1
+          status=$?
+          cat linux-validation.log
+          exit $status
+      - name: Upload Linux validation log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-validation-log
+          path: linux-validation.log
+          if-no-files-found: error
       - name: Configure and build
         shell: bash
         run: |
@@ -64,7 +77,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Validate factory scene
-        run: python tools/validate_scene_defaults.py
+        shell: pwsh
+        run: |
+          python tools/validate_scene_defaults.py *>&1 | Tee-Object -FilePath windows-validation.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload Windows validation log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-validation-log
+          path: windows-validation.log
+          if-no-files-found: error
       - name: Configure
         run: cmake --preset msvc-vs2022
       - name: Build
