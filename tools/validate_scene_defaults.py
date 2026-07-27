@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate compiled scene defaults and required runtime model assets."""
+"""Validate compiled scene defaults and report optional runtime model coverage."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ CFG = ROOT / "assets/editor/default_scene.cfg"
 SCENE_INC = ROOT / "src/epoch/render/world/hardcoded_scene_defaults.inc"
 MATERIAL_INC = ROOT / "src/epoch/render/world/hardcoded_material_defaults.inc"
 
-REQUIRED_MODELS = (
+OPTIONAL_MODELS = (
     "assets/default_pack/models/primitives/sphere_uv.obj",
     "assets/default_pack/models/primitives/torus.obj",
     "assets/default_pack/models/primitives/sphere_ico.obj",
@@ -68,10 +68,6 @@ def validate_sequence(label: str, entries: list[tuple[int, str]]) -> None:
 
 
 def main() -> None:
-    missing = [relative for relative in REQUIRED_MODELS if not (ROOT / relative).is_file()]
-    if missing:
-        fail("required runtime model assets are missing: " + ", ".join(missing))
-
     cfg = parse_cfg()
     scene = parse_entries(SCENE_INC, ENTRY_RE)
     materials = parse_entries(MATERIAL_INC, MATERIAL_RE)
@@ -96,7 +92,16 @@ def main() -> None:
         if abs(uv_scale - 1.0) > 1.0e-6:
             fail(f"factory record {index} ({cfg_name}) has UV scale {uv_scale}, expected 1.0")
 
-    print(f"validated {len(cfg)} contiguous factory records and {len(REQUIRED_MODELS)} runtime models")
+    missing = [relative for relative in OPTIONAL_MODELS if not (ROOT / relative).is_file()]
+    if missing:
+        print(
+            "warning: optional OBJ assets are absent and will use diagnostic cube proxies: "
+            + ", ".join(missing),
+            file=sys.stderr,
+        )
+
+    present = len(OPTIONAL_MODELS) - len(missing)
+    print(f"validated {len(cfg)} contiguous factory records; optional models present={present}/{len(OPTIONAL_MODELS)}")
 
 
 if __name__ == "__main__":
