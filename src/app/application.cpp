@@ -28,9 +28,6 @@ namespace epoch::app {
 namespace {
 
 std::filesystem::path resolve_asset_root() {
-    const auto local = std::filesystem::current_path() / "assets";
-    if (std::filesystem::exists(local / "shaders/pbr/pbr.frag")) return local;
-
 #if defined(_WIN32)
     std::array<wchar_t, 32768> buffer{};
     const DWORD length = GetModuleFileNameW(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
@@ -48,6 +45,9 @@ std::filesystem::path resolve_asset_root() {
     const auto beside_executable = std::filesystem::current_path() / "assets";
 #endif
     if (std::filesystem::exists(beside_executable / "shaders/pbr/pbr.frag")) return beside_executable;
+
+    const auto local = std::filesystem::current_path() / "assets";
+    if (std::filesystem::exists(local / "shaders/pbr/pbr.frag")) return local;
 
     throw std::runtime_error(
         "Asset directory not found. Build through CMake so assets are copied beside the executable.");
