@@ -13,9 +13,11 @@ from pathlib import Path, PurePosixPath
 
 ARCHIVE_SHA256 = "5026d93ee4514264da5948c7c5b663e0f2890de2f7e0cdc2bbfaf2da8ac5c4fd"
 PART_DIRECTORY = Path("assets/default_pack/model_bundle_4_6_7")
-PART_PATTERN = "models.tar.xz.part*.b64"
-EXPECTED_PART_COUNT = 9
 MODEL_PREFIX = PurePosixPath("assets/default_pack/models")
+ARCHIVE_PARTS = tuple(
+    [f"models.tar.xz.part{index:02d}.b64" for index in range(7)]
+    + [f"models.tar.xz.tail{index:02d}.b64" for index in range(5)]
+)
 
 REQUIRED_MODELS = (
     "assets/default_pack/models/architecture/bridge.obj",
@@ -46,16 +48,14 @@ REQUIRED_MODELS = (
 
 
 def _parts(source_root: Path) -> list[Path]:
-    parts = sorted((source_root / PART_DIRECTORY).glob(PART_PATTERN))
-    if len(parts) != EXPECTED_PART_COUNT:
+    directory = source_root / PART_DIRECTORY
+    parts = [directory / name for name in ARCHIVE_PARTS]
+    missing = [part.name for part in parts if not part.is_file()]
+    if missing:
         raise RuntimeError(
-            f"expected {EXPECTED_PART_COUNT} model archive parts in "
-            f"{source_root / PART_DIRECTORY}, found {len(parts)}"
+            f"model archive is missing {len(missing)} required text parts in {directory}: "
+            + ", ".join(missing)
         )
-    expected_names = [f"models.tar.xz.part{index:02d}.b64" for index in range(EXPECTED_PART_COUNT)]
-    actual_names = [part.name for part in parts]
-    if actual_names != expected_names:
-        raise RuntimeError(f"model archive parts are not contiguous: {actual_names}")
     return parts
 
 
@@ -124,7 +124,10 @@ def main() -> None:
     names = inspect_archive(archive)
     if args.destination is not None and not args.check_only:
         extract_archive(archive, args.destination.resolve())
-    print(f"validated exact model archive: {len(names)} OBJ files, sha256={ARCHIVE_SHA256}")
+    print(
+        f"validated exact model archive: {len(names)} OBJ files from "
+        f"{len(ARCHIVE_PARTS)} text parts, sha256={ARCHIVE_SHA256}"
+    )
 
 
 if __name__ == "__main__":
