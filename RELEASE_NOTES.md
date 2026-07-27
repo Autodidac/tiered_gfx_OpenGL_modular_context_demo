@@ -7,7 +7,7 @@ This release repairs the model-packaging regression in 4.6.6 and publishes actua
 - Restored the complete set of 24 authored OBJ models from the known-good 4.6.6 package.
 - Removed the global missing-model cube fallback that caused trees, props, primitives, diagnostics, terrain, and character models to appear as boxes.
 - Missing or damaged model data now fails validation and configuration instead of silently changing scene geometry.
-- The model archive is reconstructed from nine contiguous text-safe parts and verified against SHA-256 `5026d93ee4514264da5948c7c5b663e0f2890de2f7e0cdc2bbfaf2da8ac5c4fd`.
+- The model archive is reconstructed from twelve exact text-safe chunks and verified against SHA-256 `5026d93ee4514264da5948c7c5b663e0f2890de2f7e0cdc2bbfaf2da8ac5c4fd`.
 - Runtime packages are checked for restored tree models before publication.
 - The Linux smoke test rejects any diagnostic cube-fallback message.
 
