@@ -40,7 +40,7 @@
     {
       "name": "linux-gcc-release",
       "configurePreset": "linux-gcc-release",
-      "jobs": 1
+      "jobs": 0
     },
     {
       "name": "vs2026-debug",

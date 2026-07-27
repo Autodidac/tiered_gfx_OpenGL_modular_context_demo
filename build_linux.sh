@@ -22,9 +22,6 @@ else
 fi
 
 cmake --preset "$preset" -DCMAKE_CXX_COMPILER="$compiler"
-# GCC 14 can corrupt a named-module BMI when multiple consumers load it
-# concurrently. Keep the verified GCC module build serialized until that
-# compiler defect is resolved; MSVC builds remain parallel.
-cmake --build --preset "$preset" --parallel 1
+cmake --build --preset "$preset"
 python3 tools/validate_scene_defaults.py
 printf 'Built: build/linux-gcc/bin/Release/epoch_integrated_opengl_scene\n'
