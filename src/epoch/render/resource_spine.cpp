@@ -1,6 +1,7 @@
 #include "epoch/render/resource_spine.hpp"
 #include "epoch/render/gl/gl_api.hpp"
 
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 
@@ -26,13 +27,26 @@ MeshHandle ResourceSpine::create_mesh(gl::MeshData data) {
 MeshHandle ResourceSpine::load_obj_mesh(const std::filesystem::path& relative_path) {
     const std::string key = normalized_key(relative_path);
     if (const auto found = mesh_cache_.find(key); found != mesh_cache_.end()) return found->second;
-    const MeshHandle handle = create_mesh(gl::load_obj(asset_root_ / relative_path));
+
+    MeshHandle handle{};
+    try {
+        handle = create_mesh(gl::load_obj(asset_root_ / relative_path));
+    } catch (const std::exception& error) {
+        // A missing optional demonstration asset must not prevent the renderer,
+        // editor, or CI smoke test from starting. Keep the object selectable and
+        // visible with an unmistakable unit-cube proxy while reporting the exact
+        // asset failure. The cache ensures one stable proxy per missing path.
+        std::cerr << "[Epoch] OBJ load failed for " << (asset_root_ / relative_path)
+                  << ": " << error.what() << "; using diagnostic cube proxy.\n";
+        handle = create_mesh(gl::make_cube_mesh());
+    }
+
     mesh_cache_.emplace(key, handle);
     return handle;
 }
 
 TextureHandle ResourceSpine::load_texture(const std::filesystem::path& relative_path, gl::ColorSpace color_space,
-                                          bool flip_y) {
+                                           bool flip_y) {
     const std::string key = normalized_key(relative_path) + (color_space == gl::ColorSpace::srgb ? "|s" : "|l")
         + (flip_y ? "|f" : "|n");
     if (const auto found = texture_cache_.find(key); found != texture_cache_.end()) return found->second;
@@ -43,7 +57,7 @@ TextureHandle ResourceSpine::load_texture(const std::filesystem::path& relative_
 }
 
 CubeTextureHandle ResourceSpine::load_cubemap(const std::array<std::filesystem::path, 6>& relative_faces,
-                                               gl::ColorSpace color_space, bool flip_y) {
+                                                gl::ColorSpace color_space, bool flip_y) {
     std::ostringstream key_stream;
     for (const auto& face : relative_faces) key_stream << normalized_key(face) << ';';
     key_stream << (color_space == gl::ColorSpace::srgb ? 's' : 'l') << (flip_y ? 'f' : 'n');

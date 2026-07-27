@@ -1,54 +1,111 @@
-# EpochGui Integrated OpenGL Scene 4.6.6
+# Tiered OpenGL Modular Context Demo
 
-A C++23 renderer/editor demonstration with one persistent authored scene, metallic/roughness PBR, water, cloth, particles, billboards, render-to-texture, tiered shadows, and hardcoded factory defaults.
+A C++23 named-module renderer and scene editor demonstrating a practical **Tier 0 / Tier 1 graphics architecture** on one authored OpenGL scene.
 
-## 4.6.6 terrain, grass placement, tree defaults, and sun-disc correction
-
-- Terrain is a first-class selectable editor object with persistent position, size, scale, Enabled/Delete state, and height-scale controls.
-- Grass samples the edited terrain transform and height field, including valleys, instead of using a flat placement plane.
-- Grass placement uses a persistent 64x64 paintable mask; automatic shrunken solid-object footprints remain excluded after painting.
-- The five perimeter-tree transforms match `default_scene(15).cfg` exactly.
-- The animated sun is additive over the environment and no longer cuts a dark corona into the sky cubemap.
-
-
-## 4.6.5 sun and factory-default corrections
-
-- Promoted `default_scene(15).cfg` to the compiled factory baseline.
-- Direct solar radiance now fades to zero below the horizon instead of acting as an underground night light.
-- Directional and cloth shadow passes stop below the horizon after clearing the shadow target.
-- The light-view up vector switches axes at steep solar angles, preventing unstable shadow matrices.
-- The deleted planar-mirror camera housing is physically absent from the factory scene rather than retained as a tombstone.
-
-## 4.6.4 editor/model corrections
-
-- Corrected the oak and pine source meshes: only the brown trunk cylinder is rotated from the authored Z axis to the vertical Y axis.
-- The five retained perimeter trees are grounded at terrain height and use canopy-centered selection bounds.
-- All 12 crate instances are ordinary selectable editor entries while remaining one instanced renderer batch. Position, rotation, scale, Enabled, and Delete update the batched draw directly.
+The project is intended as a compact reference for cross-platform context creation, explicit renderer ownership, metallic/roughness PBR, editable scene data, and capability-budgeted rendering paths.
 
 ## Platform status
 
-| Platform | Window/context path | Status in this package |
+| Platform | Context path | Status |
 |---|---|---|
-| Windows x64 | Win32 + WGL, OpenGL 4.5 core | Native build path retained through Visual Studio 2022/2026 presets |
-| Linux x64 | X11 + GLX, OpenGL 4.5 core | Configured, compiled, linked, and run under Xvfb with GCC 14 named modules |
-| Android | NativeActivity + EGL + OpenGL ES 3.x | Integration pathway only; no SDK/NDK validation claimed |
+| Windows x64 | Win32 + WGL, OpenGL 4.5 core | Supported with Visual Studio 2022 or newer |
+| Linux x64 | X11 + GLX, OpenGL 4.5 core | Supported with GCC 14+, Ninja, X11 and libpng |
+| Android | NativeActivity + EGL + OpenGL ES 3.x | Integration scaffold only; renderer bridge is not complete |
 
-The reusable renderer target is `epoch_render_spine`. Windows uses the C++23 module files. Windows and Linux use the same C++23 named-module graph. The verified Linux preset requires Ninja and GCC 14+. Clang also needs a matching `clang-scan-deps` executable and is not the packaged default preset.
+Windows and Linux use the same `epoch.*` C++23 named-module graph. The reusable renderer target is `epoch_render_spine`.
 
-## Linux build
+## Renderer features
 
-Dependencies: CMake 3.28+, Ninja, a C++23 compiler, X11 development files, libpng development files, and a working OpenGL/GLX driver.
+- forward metallic/roughness PBR
+- normal, parallax, clearcoat and transmission materials
+- directional, point and spotlight lighting
+- projector-cookie spotlight
+- directional and point-light shadow maps
+- Tier 0 PCF and Tier 1 PCSS soft shadows
+- HDR, bloom, tone mapping, gamma, fog and FXAA
+- render-to-texture camera feeds and planar mirror feed
+- editable terrain with displacement and optional tessellation
+- terrain-following billboard grass with a paintable placement mask
+- cloth simulation with shadow casting
+- water with scene-color refraction
+- multiple particle emitters
+- selectable objects backed by one instanced crate draw
+- vertex-colored tree meshes
+- persistent editor defaults and imported materials/models
+
+## Tier policy
+
+The tier split is a **performance and compatibility budget**, not an OpenGL rule.
+
+### Tier 0 — mobile-oriented baseline
+
+- one evaluated projector spotlight
+- four finite-radius point lights
+- one directional shadow map with bounded `3×3` PCF
+- one point-light shadow cubemap
+- forward PBR
+- one billboard plane per grass instance
+- ordinary hardware instancing
+- vertex-displaced terrain without tessellation stages
+- CPU cloth and particles
+- water refraction, HDR, bloom, tone mapping and fog
+- no indirect draw, GPU queries, SSAO, tessellation or PCSS
+
+### Tier 1 — desktop additions
+
+- all three authored spotlights
+- blocker-search PCSS directional shadows
+- crossed billboard planes
+- hardware terrain tessellation
+- indirect indexed submission
+- SSAO and GPU timing queries
+
+## Editor
+
+The scene editor provides:
+
+- viewport selection and group selection
+- position, rotation, size and relative scale editing
+- finite `− / value / +` adjustment controls
+- click-to-type numeric fields and mouse scrubbing
+- Enabled and Delete state
+- editable materials and texture slots
+- selectable terrain, water, cloth, lights, particle emitters and instanced props
+- paint/erase grass placement mask
+- Save default, Reload and Reset
+
+Factory scene data is mirrored between typed hardcoded tables and `assets/editor/default_scene.cfg`.
+
+Current factory state:
+
+- **269 contiguous records**
+- no deleted tombstones
+- UV scale `1.0` on every compiled material record
+- two independent reflecting pools and emitter sets
+- five editable perimeter trees
+- twelve selectable crate instances rendered as one batch
+
+The grass paint mask is stored at `assets/editor/grass_placement_mask.pgm`.
+
+## Build on Linux
+
+Requirements:
+
+- CMake 3.28+
+- Ninja 1.11+
+- GCC 14+
+- X11 development files
+- libpng development files
+- OpenGL/GLX development files and driver
+
+On Debian/Ubuntu-like systems:
 
 ```bash
-chmod +x build_linux.sh
-./build_linux.sh linux-gcc-release
+sudo apt install g++-14 ninja-build libx11-dev libpng-dev libgl1-mesa-dev
+./build_linux.sh
 ```
 
-Clang is also supported:
-
-```bash
-./build_linux.sh linux-clang-release
-```
+The script prefers `g++-14`, then accepts `g++` only when it reports GCC 14 or newer.
 
 Output:
 
@@ -56,95 +113,79 @@ Output:
 build/linux-gcc/bin/Release/epoch_integrated_opengl_scene
 ```
 
-Run from a graphical X11/XWayland session:
+Run it from an X11 or XWayland graphical session:
 
 ```bash
 ./build/linux-gcc/bin/Release/epoch_integrated_opengl_scene
 ```
 
-## Windows build
+## Build on Windows
 
-Open the project directory and run:
-
-```text
-open_msvc.bat
-```
-
-or:
+Install Visual Studio 2022 or newer with **Desktop development with C++**, then run:
 
 ```text
 build_msvc.bat Release
 ```
 
-The Windows executable retains the application icon, Win32 input, WGL context creation, VSync control, and C++23 module build.
+To generate and open the Visual Studio solution:
 
-## Android pathway
+```text
+open_msvc.bat
+```
 
-`integration/android/` contains a NativeActivity manifest, NDK CMake target, EGL lifecycle, OpenGL ES proof frame, and explicit Tier-0 budget. It is deliberately not presented as a completed Android port. The remaining bridge is asset loading through `AAssetManager`, GLES shader variants, and connection of the existing scene/render ownership to the NativeActivity loop.
+The scripts detect the newest supported installed Visual Studio generator.
 
-## Tier policy
+## Controls
 
-The single-spotlight limit is a **Tier-0 performance budget**, not an API restriction.
+| Input | Action |
+|---|---|
+| `WASD` | Move camera |
+| `Q / E` | Move down / up |
+| `Shift` | Accelerate movement |
+| Right mouse | Camera look |
+| `F1` | Wireframe |
+| `F2` | VSync |
+| `F3` | EpochGui panel |
+| `F4` | Bloom |
+| `F5` | Shadows |
+| `F6` | Animation/simulation clock |
+| `F7` | Editor debug/x-ray view |
+| `F10` | Help strip |
+| `Esc` | Exit |
 
-### Tier 0 — mobile-oriented baseline
+## Validation
 
-- one evaluated projector spotlight
-- four finite-radius point lights
-- one directional shadow map with bounded 3×3 PCF
-- one point-light shadow cubemap
-- forward metallic/roughness PBR
-- normal mapping and optional parallax
-- vertex-expanded instanced billboards, one crossed plane pass
-- ordinary hardware instancing
-- vertex-displaced terrain; no tessellation stage
-- CPU cloth and particles
-- vertex water with scene-color refraction
-- HDR, bloom, FXAA, tone mapping, exposure, gamma, and fog
-- no geometry shaders, indirect draw, SSAO, GPU queries, or PCSS
+Validate the hardcoded scene tables against the editable cfg:
 
-### Tier 1 — desktop additions
+```bash
+python3 tools/validate_scene_defaults.py
+```
 
-- all three authored spotlights
-- blocker-search PCSS directional shadows with variable penumbra and 24 Poisson filter taps
-- crossed two-plane billboard pass
-- hardware tessellation and optional PN-style curvature
-- indirect indexed drawing
-- SSAO and GPU timing queries
+The validator checks sequential indices, matching names/counts, deleted records and the UV-scale invariant.
 
-## Foliage and tree correction
+## Project layout
 
-The grass renderer retains its explicit visible instance floor, corrected alpha cutoff, and optional crossed Tier-1 pass. `default_scene(14).cfg` now supplies the compiled grass-region position, bounds, scale, density, blade scale, and sway defaults.
+```text
+src/epoch/modules/       C++23 module interfaces
+src/epoch/context/       frame timing, input and platform-facing context spine
+src/epoch/platform/      Win32/WGL and X11/GLX implementations
+src/epoch/render/        resources, scene, renderer passes and world construction
+src/epoch/gui/           EpochGui editor overlay
+assets/shaders/          GLSL programs
+assets/editor/           editable cfg and grass placement mask
+integration/android/     Android NativeActivity/EGL pathway
+integration/epoch_engine ingestion notes for EpochEngine
+vendor/EpochGui/         GUI library
+```
 
-The eight perimeter-tree OBJs are solid low-poly meshes with authored vertex colors and no UV coordinates. They previously used an unrelated alpha-cutout foliage texture, so the main PBR pass discarded them while the shadow pass still rendered their geometry. OBJ vertex colors are now preserved as a mesh attribute, multiplied into PBR albedo, and the trees use an opaque vertex-colored material. Their visible geometry and their existing shadows therefore match.
+See `ARCHITECTURE.md` and `FEATURE_MAP.md` for ownership boundaries and the implemented technique map.
 
-## Scene defaults and editor
+## Known limitations
 
-The approved scene state is compiled into typed factory tables and mirrored to `assets/editor/default_scene.cfg`.
+- Android contains a platform pathway, not a completed application port.
+- Linux model/texture import does not yet provide a native file-picker dialog.
+- The desktop renderer requires an OpenGL 4.5 core context.
 
-- 260 contiguous factory records
-- no deleted factory records
-- UV scale `1.0` on all compiled material records
-- original and duplicated reflecting pools, each with independent water, mote, and mist emitters
-- restored projector-cookie spotlight plus red/blue camera-room lights
-- `EpochGui` branding
-- cloth wind default `0.1`
+## License
 
-The inspector retains `− / editable number / +`. Clicking enters exact text; Backspace removes one character; dragging the number scrubs it with a horizontal-resize cursor. **Enabled** controls visibility/effect activity, while **Delete** removes an item from persistent editor state.
-
-## Runtime controls
-
-- `WASD`: move
-- `Q/E`: move down/up
-- `Shift`: accelerate
-- hold right mouse: camera look
-- `F1`: wireframe
-- `F2`: VSync
-- `F3`: EpochGui panel
-- `F4`: bloom
-- `F5`: shadows
-- `F6`: animation/simulation clock
-- `F7`: editor debug/x-ray view
-- `F10`: help strip
-- `Esc`: exit
-
-See `ARCHITECTURE.md`, `FEATURE_MAP.md`, and `integration/epoch_engine/INGESTION_MAP.md` for ownership and engine-ingestion details.
+See `LICENSE`.

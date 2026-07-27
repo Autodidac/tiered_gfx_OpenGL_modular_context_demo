@@ -11,41 +11,23 @@ module;
 #include <unistd.h>
 #endif
 #include <array>
+#include <cstdio>
+#include <exception>
 #include <filesystem>
 #include <stdexcept>
+#include <string>
 #include <utility>
 
 module epoch.app;
 
+import epoch.context.spine;
+import epoch.render.spine;
+import epoch.core.log;
+
 namespace epoch::app {
-
-Application::Application(context::NativeApplicationInstance instance, std::filesystem::path asset_root)
-    : context_{instance}, renderer_{std::move(asset_root)} {}
-
-int Application::run() {
-    context::FrameContext frame{};
-    float title_accumulator{};
-    int title_frames{};
-    while (context_.begin_frame(frame)) {
-        context_.apply_runtime_controls();
-        renderer_.update(context_.input(), frame, context_.controls());
-        renderer_.render(frame, context_.controls());
-        context_.end_frame();
-        title_accumulator += frame.delta_seconds;
-        ++title_frames;
-        if (title_accumulator >= 0.35f) {
-            context_.update_title(static_cast<float>(title_frames) / title_accumulator);
-            title_accumulator = 0.0f;
-            title_frames = 0;
-        }
-    }
-    return 0;
-}
+namespace {
 
 std::filesystem::path resolve_asset_root() {
-    const auto local = std::filesystem::current_path() / "assets";
-    if (std::filesystem::exists(local / "shaders/pbr/pbr.frag")) return local;
-
 #if defined(_WIN32)
     std::array<wchar_t, 32768> buffer{};
     const DWORD length = GetModuleFileNameW(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
@@ -64,8 +46,62 @@ std::filesystem::path resolve_asset_root() {
 #endif
     if (std::filesystem::exists(beside_executable / "shaders/pbr/pbr.frag")) return beside_executable;
 
+    const auto local = std::filesystem::current_path() / "assets";
+    if (std::filesystem::exists(local / "shaders/pbr/pbr.frag")) return local;
+
     throw std::runtime_error(
         "Asset directory not found. Build through CMake so assets are copied beside the executable.");
+}
+
+class Application final {
+public:
+    Application(context::NativeApplicationInstance instance, std::filesystem::path asset_root)
+        : context_{instance}, renderer_{std::move(asset_root)} {}
+
+    int run() {
+        context::FrameContext frame{};
+        float title_accumulator{};
+        int title_frames{};
+        while (context_.begin_frame(frame)) {
+            context_.apply_runtime_controls();
+            renderer_.update(context_.input(), frame, context_.controls());
+            renderer_.render(frame, context_.controls());
+            context_.end_frame();
+            title_accumulator += frame.delta_seconds;
+            ++title_frames;
+            if (title_accumulator >= 0.35f) {
+                context_.update_title(static_cast<float>(title_frames) / title_accumulator);
+                title_accumulator = 0.0f;
+                title_frames = 0;
+            }
+        }
+        return 0;
+    }
+
+private:
+    context::ContextSpine context_;
+    render::RenderSpine renderer_;
+};
+
+} // namespace
+
+int run_application(void* native_instance) {
+    try {
+        Application application{
+            static_cast<context::NativeApplicationInstance>(native_instance),
+            resolve_asset_root()
+        };
+        return application.run();
+    } catch (const std::exception& error) {
+        core::log_error(error.what());
+#if defined(_WIN32)
+        const std::string message = std::string{"Integrated OpenGL Scene failed:\n\n"} + error.what();
+        MessageBoxA(nullptr, message.c_str(), "Integrated OpenGL Scene", MB_OK | MB_ICONERROR);
+#else
+        std::fprintf(stderr, "Integrated OpenGL Scene failed:\n\n%s\n", error.what());
+#endif
+        return 1;
+    }
 }
 
 } // namespace epoch::app

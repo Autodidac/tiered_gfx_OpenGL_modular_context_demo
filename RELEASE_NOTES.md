@@ -1,0 +1,18 @@
+# 4.6.6
+
+This release publishes the current renderer/editor demo with reliability and project-maintenance fixes.
+
+## Fixed
+
+- Linux right-mouse camera look now uses centered relative motion and no longer stalls when the pointer reaches a window edge.
+- Framebuffer completeness failures restore the default framebuffer before reporting an error.
+- Linux builds prefer `g++-14` explicitly and reject older default GCC installations instead of failing later in module compilation.
+- The `epoch.app` interface no longer exports standard-library-heavy implementation state, preventing GCC 14 `Bad file data` failures while loading the application BMI.
+- Restored the missing crate OBJ required by the instanced-prop renderer and editor.
+- The README now reports the actual 269-record scene and removes obsolete patch-history text and unsupported build commands.
+
+## Project maintenance
+
+- Added automated validation for cfg/table indices, names, deleted records, UV scale and all startup model assets.
+- Added Windows and Linux CI.
+- Added automatic GitHub release packaging after validated pushes to `main`.

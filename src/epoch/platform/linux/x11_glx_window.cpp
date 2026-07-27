@@ -283,6 +283,14 @@ void X11GlxWindow::handle_button(const XButtonEvent& event, bool pressed) noexce
         state_.input.right_mouse_down = pressed;
         state_.input.have_last_mouse = false;
         set_pointer_hidden(pressed);
+        if (pressed) {
+            const int center_x = state_.width / 2;
+            const int center_y = state_.height / 2;
+            state_.input.mouse_x = center_x;
+            state_.input.mouse_y = center_y;
+            XWarpPointer(display_, None, window_, 0, 0, 0, 0, center_x, center_y);
+            XFlush(display_);
+        }
     } else if (pressed && event.button == Button4) {
         ++state_.input.mouse_wheel;
     } else if (pressed && event.button == Button5) {
@@ -305,7 +313,6 @@ void X11GlxWindow::poll_events() noexcept {
             break;
         case KeyPress: handle_key(event.xkey, true); break;
         case KeyRelease:
-            // Ignore synthetic autorepeat releases followed by a same-time press.
             if (XEventsQueued(display_, QueuedAfterReading) > 0) {
                 XEvent next{};
                 XPeekEvent(display_, &next);
@@ -319,16 +326,25 @@ void X11GlxWindow::poll_events() noexcept {
         case MotionNotify: {
             const int x = event.xmotion.x;
             const int y = event.xmotion.y;
-            state_.input.mouse_x = x;
-            state_.input.mouse_y = y;
             if (state_.input.right_mouse_down) {
-                if (state_.input.have_last_mouse) {
-                    state_.input.mouse_dx += x - state_.input.last_mouse_x;
-                    state_.input.mouse_dy += y - state_.input.last_mouse_y;
+                const int center_x = state_.width / 2;
+                const int center_y = state_.height / 2;
+                const int delta_x = x - center_x;
+                const int delta_y = y - center_y;
+                if (delta_x != 0 || delta_y != 0) {
+                    state_.input.mouse_dx += delta_x;
+                    state_.input.mouse_dy += delta_y;
+                    XWarpPointer(display_, None, window_, 0, 0, 0, 0, center_x, center_y);
+                    XFlush(display_);
                 }
-                state_.input.last_mouse_x = x;
-                state_.input.last_mouse_y = y;
+                state_.input.mouse_x = center_x;
+                state_.input.mouse_y = center_y;
+                state_.input.last_mouse_x = center_x;
+                state_.input.last_mouse_y = center_y;
                 state_.input.have_last_mouse = true;
+            } else {
+                state_.input.mouse_x = x;
+                state_.input.mouse_y = y;
             }
             break;
         }

@@ -1,0 +1,130 @@
+name: CI and Release
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq g++-14 ninja-build libx11-dev libpng-dev libgl1-mesa-dev mesa-utils xvfb
+      - name: Validate factory scene
+        shell: bash
+        run: |
+          set +e
+          python3 tools/validate_scene_defaults.py > linux-validation.log 2>&1
+          status=$?
+          cat linux-validation.log
+          exit $status
+      - name: Upload Linux validation log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-validation-log
+          path: linux-validation.log
+          if-no-files-found: error
+      - name: Configure and build
+        shell: bash
+        run: |
+          set +e
+          ./build_linux.sh > linux-build.log 2>&1
+          status=$?
+          if [[ $status -ne 0 ]]; then
+            tail -n 160 linux-build.log
+          fi
+          exit $status
+      - name: Upload Linux build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build-log
+          path: linux-build.log
+          if-no-files-found: error
+      - name: Startup smoke test
+        shell: bash
+        run: |
+          set +e
+          LIBGL_ALWAYS_SOFTWARE=1 timeout 10s xvfb-run -a ./build/linux-gcc/bin/Release/epoch_integrated_opengl_scene > linux-runtime.log 2>&1
+          status=$?
+          cat linux-runtime.log
+          if [[ $status -ne 124 ]]; then
+            echo "Expected the interactive application to remain active until timeout; exit status was $status." >&2
+            exit 1
+          fi
+      - name: Upload Linux runtime log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-runtime-log
+          path: linux-runtime.log
+          if-no-files-found: warn
+
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate factory scene
+        shell: pwsh
+        run: |
+          python tools/validate_scene_defaults.py *>&1 | Tee-Object -FilePath windows-validation.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload Windows validation log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-validation-log
+          path: windows-validation.log
+          if-no-files-found: error
+      - name: Configure
+        run: cmake --preset msvc-vs2022
+      - name: Build
+        run: cmake --build --preset vs2022-release
+
+  release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [linux, windows]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Read project version
+        id: version
+        shell: bash
+        run: |
+          VERSION=$(sed -nE 's/^[[:space:]]*VERSION[[:space:]]+([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' CMakeLists.txt | head -n1)
+          test -n "$VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "archive=epoch_integrated_opengl_scene_${VERSION//./_}.zip" >> "$GITHUB_OUTPUT"
+      - name: Package source
+        shell: bash
+        run: |
+          PREFIX="epoch_integrated_opengl_scene_${{ steps.version.outputs.version }}/"
+          git archive --format=zip --prefix="$PREFIX" -o "${{ steps.version.outputs.archive }}" HEAD
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+          ARCHIVE: ${{ steps.version.outputs.archive }}
+        shell: bash
+        run: |
+          TAG="v$VERSION"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ARCHIVE" --clobber
+            gh release edit "$TAG" --title "$TAG" --notes-file RELEASE_NOTES.md
+          else
+            gh release create "$TAG" "$ARCHIVE" --target "$GITHUB_SHA" --title "$TAG" --notes-file RELEASE_NOTES.md
+          fi
