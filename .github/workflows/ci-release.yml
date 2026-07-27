@@ -1,0 +1,76 @@
+name: CI and Release
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-14 ninja-build libx11-dev libpng-dev libgl1-mesa-dev xvfb
+      - name: Validate factory scene
+        run: python3 tools/validate_scene_defaults.py
+      - name: Configure and build
+        run: ./build_linux.sh
+      - name: Startup smoke test
+        run: timeout 10s xvfb-run -a ./build/linux-gcc/bin/Release/epoch_integrated_opengl_scene || test $? -eq 124
+
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate factory scene
+        run: python tools/validate_scene_defaults.py
+      - name: Configure
+        run: cmake --preset msvc-vs2022
+      - name: Build
+        run: cmake --build --preset vs2022-release
+
+  release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [linux, windows]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Read project version
+        id: version
+        shell: bash
+        run: |
+          VERSION=$(sed -nE 's/^[[:space:]]*VERSION[[:space:]]+([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' CMakeLists.txt | head -n1)
+          test -n "$VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "archive=epoch_integrated_opengl_scene_${VERSION//./_}.zip" >> "$GITHUB_OUTPUT"
+      - name: Package source
+        shell: bash
+        run: |
+          PREFIX="epoch_integrated_opengl_scene_${{ steps.version.outputs.version }}/"
+          git archive --format=zip --prefix="$PREFIX" -o "${{ steps.version.outputs.archive }}" HEAD
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+          ARCHIVE: ${{ steps.version.outputs.archive }}
+        shell: bash
+        run: |
+          TAG="v$VERSION"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ARCHIVE" --clobber
+            gh release edit "$TAG" --title "$TAG" --notes-file RELEASE_NOTES.md
+          else
+            gh release create "$TAG" "$ARCHIVE" --target "$GITHUB_SHA" --title "$TAG" --notes-file RELEASE_NOTES.md
+          fi

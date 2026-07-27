@@ -11,7 +11,9 @@ ShadowTarget::ShadowTarget(int size):size_{size}{
     gl::TexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,clamp_to_border);gl::TexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,clamp_to_border);
     constexpr float border[]{1,1,1,1};gl::TexParameterfv(GL_TEXTURE_2D,texture_border_color,border);
     BindFramebuffer(framebuffer,fbo_);FramebufferTexture2D(framebuffer,depth_attachment,GL_TEXTURE_2D,depth_,0);gl::DrawBuffer(GL_NONE);gl::ReadBuffer(GL_NONE);
-    if(CheckFramebufferStatus(framebuffer)!=framebuffer_complete)throw std::runtime_error("Shadow framebuffer is incomplete");BindFramebuffer(framebuffer,0);
+    const bool complete = CheckFramebufferStatus(framebuffer) == framebuffer_complete;
+    BindFramebuffer(framebuffer, 0);
+    if (!complete) throw std::runtime_error("Shadow framebuffer is incomplete");
 }
 ShadowTarget::~ShadowTarget(){if(depth_)gl::DeleteTextures(1,&depth_);if(fbo_)DeleteFramebuffers(1,&fbo_);}
 void ShadowTarget::bind_for_write()const noexcept{BindFramebuffer(framebuffer,fbo_);gl::Viewport(0,0,size_,size_);gl::Clear(GL_DEPTH_BUFFER_BIT);}
@@ -28,7 +30,9 @@ void HdrTarget::resize(int width,int height){width=std::max(1,width);height=std:
     gl::TexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);gl::TexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     gl::TexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,clamp_to_edge);gl::TexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,clamp_to_edge);
     FramebufferTexture2D(framebuffer,depth_attachment,GL_TEXTURE_2D,depth_,0);
-    if(CheckFramebufferStatus(framebuffer)!=framebuffer_complete)throw std::runtime_error("HDR framebuffer is incomplete");BindFramebuffer(framebuffer,0);
+    const bool complete = CheckFramebufferStatus(framebuffer) == framebuffer_complete;
+    BindFramebuffer(framebuffer, 0);
+    if (!complete) throw std::runtime_error("HDR framebuffer is incomplete");
 }
 void HdrTarget::bind_for_write()const noexcept{BindFramebuffer(framebuffer,fbo_);gl::Viewport(0,0,width_,height_);}
 void HdrTarget::bind_scene(int unit)const noexcept{ActiveTexture(texture0+unit);gl::BindTexture(GL_TEXTURE_2D,color_[0]);}

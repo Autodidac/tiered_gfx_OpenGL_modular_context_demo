@@ -12,8 +12,7 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/linux-gcc",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_CXX_COMPILER": "g++"
+        "CMAKE_BUILD_TYPE": "Release"
       }
     },
     {
