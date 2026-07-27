@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate compiled scene defaults against the editable V5 cfg."""
+"""Validate compiled scene defaults and required runtime assets."""
 
 from __future__ import annotations
 
@@ -12,6 +12,22 @@ ROOT = Path(__file__).resolve().parents[1]
 CFG = ROOT / "assets/editor/default_scene.cfg"
 SCENE_INC = ROOT / "src/epoch/render/world/hardcoded_scene_defaults.inc"
 MATERIAL_INC = ROOT / "src/epoch/render/world/hardcoded_material_defaults.inc"
+
+REQUIRED_MODELS = (
+    "assets/default_pack/models/primitives/sphere_uv.obj",
+    "assets/default_pack/models/primitives/torus.obj",
+    "assets/default_pack/models/primitives/sphere_ico.obj",
+    "assets/default_pack/models/primitives/cylinder.obj",
+    "assets/default_pack/models/primitives/capsule.obj",
+    "assets/default_pack/models/characters/humanoid_static.obj",
+    "assets/default_pack/models/nature/tree_oak.obj",
+    "assets/default_pack/models/nature/tree_pine.obj",
+    "assets/default_pack/models/nature/rock_cluster.obj",
+    "assets/default_pack/models/props/crate.obj",
+    "assets/default_pack/models/diagnostics/hard_edges.obj",
+    "assets/default_pack/models/diagnostics/smooth_edges.obj",
+    "assets/default_pack/models/diagnostics/textured_atlas_cube.obj",
+)
 
 ENTRY_RE = re.compile(r"HardcodedDefaultEntry\s*\{\s*(\d+)u,\s*\"([^\"]+)\"", re.S)
 MATERIAL_RE = re.compile(r"HardcodedMaterialEntry\s*\{\s*(\d+)u,\s*\"([^\"]+)\"", re.S)
@@ -51,7 +67,14 @@ def validate_sequence(label: str, entries: list[tuple[int, str]]) -> None:
             fail(f"{label} index {actual} is out of sequence; expected {expected}")
 
 
+def validate_required_models() -> None:
+    missing = [relative for relative in REQUIRED_MODELS if not (ROOT / relative).is_file()]
+    if missing:
+        fail("required runtime model assets are missing: " + ", ".join(missing))
+
+
 def main() -> None:
+    validate_required_models()
     cfg = parse_cfg()
     scene = parse_entries(SCENE_INC, ENTRY_RE)
     materials = parse_entries(MATERIAL_INC, MATERIAL_RE)
@@ -76,7 +99,7 @@ def main() -> None:
         if abs(uv_scale - 1.0) > 1.0e-6:
             fail(f"factory record {index} ({cfg_name}) has UV scale {uv_scale}, expected 1.0")
 
-    print(f"validated {len(cfg)} contiguous factory records")
+    print(f"validated {len(cfg)} contiguous factory records and {len(REQUIRED_MODELS)} runtime models")
 
 
 if __name__ == "__main__":
