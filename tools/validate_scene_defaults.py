@@ -1,22 +1,17 @@
 #!/usr/bin/env python3
-"""Validate compiled scene defaults and prepare packaged runtime model assets."""
+"""Validate compiled scene defaults and required runtime model assets."""
 
 from __future__ import annotations
 
-import base64
-import binascii
-import io
 import re
 import shlex
 import sys
-import zipfile
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CFG = ROOT / "assets/editor/default_scene.cfg"
 SCENE_INC = ROOT / "src/epoch/render/world/hardcoded_scene_defaults.inc"
 MATERIAL_INC = ROOT / "src/epoch/render/world/hardcoded_material_defaults.inc"
-MODEL_BUNDLE = ROOT / "assets/default_pack/model_bundle.zip"
 
 REQUIRED_MODELS = (
     "assets/default_pack/models/primitives/sphere_uv.obj",
@@ -34,8 +29,8 @@ REQUIRED_MODELS = (
     "assets/default_pack/models/diagnostics/textured_atlas_cube.obj",
 )
 
-ENTRY_RE = re.compile(r"HardcodedDefaultEntry\s*\{\s*(\d+)u,\s*\"([^\"]+)\"", re.S)
-MATERIAL_RE = re.compile(r"HardcodedMaterialEntry\s*\{\s*(\d+)u,\s*\"([^\"]+)\"", re.S)
+ENTRY_RE = re.compile(r'HardcodedDefaultEntry\s*\{\s*(\d+)u,\s*"([^"]+)"', re.S)
+MATERIAL_RE = re.compile(r'HardcodedMaterialEntry\s*\{\s*(\d+)u,\s*"([^"]+)"', re.S)
 
 
 def fail(message: str) -> None:
@@ -72,56 +67,11 @@ def validate_sequence(label: str, entries: list[tuple[int, str]]) -> None:
             fail(f"{label} index {actual} is out of sequence; expected {expected}")
 
 
-def open_model_bundle() -> zipfile.ZipFile:
-    if not MODEL_BUNDLE.is_file():
-        fail("required runtime models are missing and model_bundle.zip is absent")
-
-    raw = MODEL_BUNDLE.read_bytes()
-    candidates = [raw]
-    try:
-        candidates.append(base64.b64decode(b"".join(raw.split()), validate=True))
-    except (binascii.Error, ValueError):
-        pass
-
-    for candidate in candidates:
-        try:
-            archive = zipfile.ZipFile(io.BytesIO(candidate))
-            bad_member = archive.testzip()
-            if bad_member is None:
-                return archive
-            archive.close()
-        except (OSError, zipfile.BadZipFile):
-            continue
-    fail("model_bundle.zip is neither a valid ZIP nor a valid base64-encoded ZIP")
-
-
-def safe_extract_member(archive: zipfile.ZipFile, relative: str) -> None:
-    member = PurePosixPath(relative)
-    if member.is_absolute() or ".." in member.parts:
-        fail(f"unsafe model bundle member: {relative}")
-    destination = ROOT.joinpath(*member.parts)
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_bytes(archive.read(relative))
-
-
-def validate_required_models() -> None:
+def main() -> None:
     missing = [relative for relative in REQUIRED_MODELS if not (ROOT / relative).is_file()]
     if missing:
-        with open_model_bundle() as archive:
-            available = set(archive.namelist())
-            unresolved = [relative for relative in missing if relative not in available]
-            if unresolved:
-                fail("required runtime model assets are missing: " + ", ".join(unresolved))
-            for relative in missing:
-                safe_extract_member(archive, relative)
+        fail("required runtime model assets are missing: " + ", ".join(missing))
 
-    unresolved = [relative for relative in REQUIRED_MODELS if not (ROOT / relative).is_file()]
-    if unresolved:
-        fail("runtime model extraction failed: " + ", ".join(unresolved))
-
-
-def main() -> None:
-    validate_required_models()
     cfg = parse_cfg()
     scene = parse_entries(SCENE_INC, ENTRY_RE)
     materials = parse_entries(MATERIAL_INC, MATERIAL_RE)
