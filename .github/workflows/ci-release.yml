@@ -21,7 +21,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq g++-14 ninja-build libx11-dev libpng-dev libgl1-mesa-dev mesa-utils xvfb
-      - name: Validate factory scene
+      - name: Validate factory scene and models
         shell: bash
         run: |
           set +e
@@ -64,6 +64,10 @@ jobs:
             echo "Expected the interactive application to remain active until timeout; exit status was $status." >&2
             exit 1
           fi
+          if grep -F "using diagnostic cube proxy" linux-runtime.log; then
+            echo "The runtime used a cube model fallback." >&2
+            exit 1
+          fi
       - name: Upload Linux runtime log
         if: always()
         uses: actions/upload-artifact@v4
@@ -71,12 +75,34 @@ jobs:
           name: linux-runtime-log
           path: linux-runtime.log
           if-no-files-found: warn
+      - name: Package Linux x64 binary
+        shell: bash
+        run: |
+          VERSION=$(sed -nE 's/^[[:space:]]*VERSION[[:space:]]+([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' cmake/epoch_project_setup.cmake | head -n1)
+          test -n "$VERSION"
+          NAME="epoch_integrated_opengl_scene_${VERSION//./_}_linux_x64"
+          RUNTIME="$GITHUB_WORKSPACE/build/linux-gcc/bin/Release"
+          STAGE="$RUNNER_TEMP/$NAME"
+          test -x "$RUNTIME/epoch_integrated_opengl_scene"
+          test -f "$RUNTIME/assets/default_pack/models/nature/tree_oak.obj"
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE"
+          install -m 0755 "$RUNTIME/epoch_integrated_opengl_scene" "$STAGE/"
+          cp -a "$RUNTIME/assets" "$STAGE/"
+          cp README.md LICENSE "$STAGE/"
+          tar -C "$RUNNER_TEMP" -czf "$GITHUB_WORKSPACE/$NAME.tar.gz" "$NAME"
+      - name: Upload Linux binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-binary
+          path: epoch_integrated_opengl_scene_*_linux_x64.tar.gz
+          if-no-files-found: error
 
   windows:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
-      - name: Validate factory scene
+      - name: Validate factory scene and models
         shell: pwsh
         run: |
           python tools/validate_scene_defaults.py *>&1 | Tee-Object -FilePath windows-validation.log
@@ -92,6 +118,29 @@ jobs:
         run: cmake --preset msvc-vs2022
       - name: Build
         run: cmake --build --preset vs2022-release
+      - name: Package Windows x64 binary
+        shell: pwsh
+        run: |
+          $line = Select-String -Path cmake/epoch_project_setup.cmake -Pattern '^\s*VERSION\s+([0-9]+\.[0-9]+\.[0-9]+)' | Select-Object -First 1
+          if (-not $line) { throw 'Could not read project version.' }
+          $version = $line.Matches[0].Groups[1].Value
+          $name = "epoch_integrated_opengl_scene_$($version -replace '\.','_')_windows_x64"
+          $runtime = Join-Path $PWD 'build\vs2022\bin\Release'
+          $stage = Join-Path $env:RUNNER_TEMP $name
+          if (-not (Test-Path "$runtime\epoch_integrated_opengl_scene.exe")) { throw 'Windows executable is missing.' }
+          if (-not (Test-Path "$runtime\assets\default_pack\models\nature\tree_oak.obj")) { throw 'Restored model assets are missing.' }
+          Remove-Item $stage -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item $stage -ItemType Directory | Out-Null
+          Copy-Item "$runtime\epoch_integrated_opengl_scene.exe" $stage
+          Copy-Item "$runtime\assets" $stage -Recurse
+          Copy-Item README.md, LICENSE $stage
+          Compress-Archive -Path $stage -DestinationPath "$name.zip" -Force
+      - name: Upload Windows binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-binary
+          path: epoch_integrated_opengl_scene_*_windows_x64.zip
+          if-no-files-found: error
 
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -101,30 +150,39 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-binary
+          path: dist
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-binary
+          path: dist
       - name: Read project version
         id: version
         shell: bash
         run: |
-          VERSION=$(sed -nE 's/^[[:space:]]*VERSION[[:space:]]+([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' CMakeLists.txt | head -n1)
+          VERSION=$(sed -nE 's/^[[:space:]]*VERSION[[:space:]]+([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' cmake/epoch_project_setup.cmake | head -n1)
           test -n "$VERSION"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "archive=epoch_integrated_opengl_scene_${VERSION//./_}.zip" >> "$GITHUB_OUTPUT"
+          echo "source=epoch_integrated_opengl_scene_${VERSION//./_}_source.zip" >> "$GITHUB_OUTPUT"
       - name: Package source
         shell: bash
         run: |
           PREFIX="epoch_integrated_opengl_scene_${{ steps.version.outputs.version }}/"
-          git archive --format=zip --prefix="$PREFIX" -o "${{ steps.version.outputs.archive }}" HEAD
-      - name: Publish GitHub release
+          git archive --format=zip --prefix="$PREFIX" -o "dist/${{ steps.version.outputs.source }}" HEAD
+      - name: Publish GitHub release with binaries
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.version }}
-          ARCHIVE: ${{ steps.version.outputs.archive }}
         shell: bash
         run: |
           TAG="v$VERSION"
+          mapfile -t ASSETS < <(find dist -maxdepth 1 -type f -print | sort)
+          test ${#ASSETS[@]} -eq 3
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" "$ARCHIVE" --clobber
+            gh release upload "$TAG" "${ASSETS[@]}" --clobber
             gh release edit "$TAG" --title "$TAG" --notes-file RELEASE_NOTES.md
           else
-            gh release create "$TAG" "$ARCHIVE" --target "$GITHUB_SHA" --title "$TAG" --notes-file RELEASE_NOTES.md
+            gh release create "$TAG" "${ASSETS[@]}" --target "$GITHUB_SHA" --title "$TAG" --notes-file RELEASE_NOTES.md
           fi
