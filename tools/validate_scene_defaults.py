@@ -70,21 +70,27 @@ def validate_sequence(label: str, entries: list[tuple[int, str]]) -> None:
 
 
 def validate_required_models() -> None:
+    missing = [relative for relative in REQUIRED_MODELS if not (ROOT / relative).is_file()]
+    if not missing:
+        return
+
     bundled: set[str] = set()
     if MODEL_BUNDLE.is_file():
         try:
             with zipfile.ZipFile(MODEL_BUNDLE) as archive:
-                archive.testzip()
+                bad_member = archive.testzip()
+                if bad_member is not None:
+                    fail(f"runtime model bundle contains a corrupt member: {bad_member}")
                 bundled = set(archive.namelist())
         except (OSError, zipfile.BadZipFile) as error:
-            fail(f"runtime model bundle is invalid: {error}")
+            fail(
+                "required runtime models are missing and the optional model bundle is invalid: "
+                f"{error}"
+            )
 
-    missing = [
-        relative for relative in REQUIRED_MODELS
-        if not (ROOT / relative).is_file() and relative not in bundled
-    ]
-    if missing:
-        fail("required runtime model assets are missing: " + ", ".join(missing))
+    unresolved = [relative for relative in missing if relative not in bundled]
+    if unresolved:
+        fail("required runtime model assets are missing: " + ", ".join(unresolved))
 
 
 def main() -> None:
