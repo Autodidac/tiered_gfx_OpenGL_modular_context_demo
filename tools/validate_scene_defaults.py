@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate compiled scene defaults and report optional runtime model coverage."""
+"""Validate compiled scene defaults and the exact packaged runtime model archive."""
 
 from __future__ import annotations
 
@@ -8,26 +8,12 @@ import shlex
 import sys
 from pathlib import Path
 
+from prepare_model_assets import REQUIRED_MODELS, decode_archive, inspect_archive
+
 ROOT = Path(__file__).resolve().parents[1]
 CFG = ROOT / "assets/editor/default_scene.cfg"
 SCENE_INC = ROOT / "src/epoch/render/world/hardcoded_scene_defaults.inc"
 MATERIAL_INC = ROOT / "src/epoch/render/world/hardcoded_material_defaults.inc"
-
-OPTIONAL_MODELS = (
-    "assets/default_pack/models/primitives/sphere_uv.obj",
-    "assets/default_pack/models/primitives/torus.obj",
-    "assets/default_pack/models/primitives/sphere_ico.obj",
-    "assets/default_pack/models/primitives/cylinder.obj",
-    "assets/default_pack/models/primitives/capsule.obj",
-    "assets/default_pack/models/characters/humanoid_static.obj",
-    "assets/default_pack/models/nature/tree_oak.obj",
-    "assets/default_pack/models/nature/tree_pine.obj",
-    "assets/default_pack/models/nature/rock_cluster.obj",
-    "assets/default_pack/models/props/crate.obj",
-    "assets/default_pack/models/diagnostics/hard_edges.obj",
-    "assets/default_pack/models/diagnostics/smooth_edges.obj",
-    "assets/default_pack/models/diagnostics/textured_atlas_cube.obj",
-)
 
 ENTRY_RE = re.compile(r'HardcodedDefaultEntry\s*\{\s*(\d+)u,\s*"([^"]+)"', re.S)
 MATERIAL_RE = re.compile(r'HardcodedMaterialEntry\s*\{\s*(\d+)u,\s*"([^"]+)"', re.S)
@@ -68,6 +54,11 @@ def validate_sequence(label: str, entries: list[tuple[int, str]]) -> None:
 
 
 def main() -> None:
+    try:
+        archive_names = inspect_archive(decode_archive(ROOT))
+    except RuntimeError as error:
+        fail(str(error))
+
     cfg = parse_cfg()
     scene = parse_entries(SCENE_INC, ENTRY_RE)
     materials = parse_entries(MATERIAL_INC, MATERIAL_RE)
@@ -92,16 +83,12 @@ def main() -> None:
         if abs(uv_scale - 1.0) > 1.0e-6:
             fail(f"factory record {index} ({cfg_name}) has UV scale {uv_scale}, expected 1.0")
 
-    missing = [relative for relative in OPTIONAL_MODELS if not (ROOT / relative).is_file()]
-    if missing:
-        print(
-            "warning: optional OBJ assets are absent and will use diagnostic cube proxies: "
-            + ", ".join(missing),
-            file=sys.stderr,
-        )
-
-    present = len(OPTIONAL_MODELS) - len(missing)
-    print(f"validated {len(cfg)} contiguous factory records; optional models present={present}/{len(OPTIONAL_MODELS)}")
+    print(
+        f"validated {len(cfg)} contiguous factory records and "
+        f"{len(REQUIRED_MODELS)} exact runtime OBJ models"
+    )
+    if len(archive_names) != len(REQUIRED_MODELS):
+        print(f"note: archive contains {len(archive_names)} OBJ files")
 
 
 if __name__ == "__main__":
