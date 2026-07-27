@@ -20,7 +20,7 @@ jobs:
       - name: Install Linux dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq g++-14 ninja-build libx11-dev libpng-dev libgl1-mesa-dev xvfb
+          sudo apt-get install -y -qq g++-14 ninja-build libx11-dev libpng-dev libgl1-mesa-dev mesa-utils xvfb
       - name: Validate factory scene
         run: python3 tools/validate_scene_defaults.py
       - name: Configure and build
@@ -41,7 +41,23 @@ jobs:
           path: linux-build.log
           if-no-files-found: error
       - name: Startup smoke test
-        run: timeout 10s xvfb-run -a ./build/linux-gcc/bin/Release/epoch_integrated_opengl_scene || test $? -eq 124
+        shell: bash
+        run: |
+          set +e
+          LIBGL_ALWAYS_SOFTWARE=1 timeout 10s xvfb-run -a ./build/linux-gcc/bin/Release/epoch_integrated_opengl_scene > linux-runtime.log 2>&1
+          status=$?
+          cat linux-runtime.log
+          if [[ $status -ne 124 ]]; then
+            echo "Expected the interactive application to remain active until timeout; exit status was $status." >&2
+            exit 1
+          fi
+      - name: Upload Linux runtime log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-runtime-log
+          path: linux-runtime.log
+          if-no-files-found: warn
 
   windows:
     runs-on: windows-2022
